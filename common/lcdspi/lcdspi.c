@@ -119,10 +119,7 @@ static void st7789_init_sequence(void) {
 }
 
 void lcd_spi_init(void) {
-    spi_init(spi0, LCD_SPI_SPEED);
-    gpio_set_function(LCD_SCK_PIN,  GPIO_FUNC_SPI);
-    gpio_set_function(LCD_MOSI_PIN, GPIO_FUNC_SPI);
-
+    // najpierw GPIO jako SIO żeby CS był wysoki przed inicjalizacją SPI
     gpio_init(LCD_CS_PIN);
     gpio_init(LCD_DC_PIN);
     gpio_init(LCD_BL_PIN);
@@ -131,13 +128,25 @@ void lcd_spi_init(void) {
     gpio_set_dir(LCD_DC_PIN,  GPIO_OUT);
     gpio_set_dir(LCD_BL_PIN,  GPIO_OUT);
 
-    lcd_spi_raise_cs();
-    gpio_put(LCD_BL_PIN, 1);  // podświetlenie ON
+    gpio_put(LCD_CS_PIN, 1);   // CS wysoki — nieaktywny
+    gpio_put(LCD_DC_PIN, 1);
+    gpio_put(LCD_BL_PIN, 0);   // podświetlenie wyłączone na start
+
+    sleep_ms(10);
+
+    // inicjalizacja SPI po ustawieniu GPIO
+    spi_init(spi0, 10 * 1000 * 1000); // 10MHz — bezpieczna prędkość startowa
+    spi_set_format(spi0, 8, SPI_CPOL_0, SPI_CPHA_0, SPI_MSB_FIRST);
+
+    gpio_set_function(LCD_SCK_PIN,  GPIO_FUNC_SPI);
+    gpio_set_function(LCD_MOSI_PIN, GPIO_FUNC_SPI);
 }
 
 void lcd_init(void) {
     lcd_spi_init();
     st7789_init_sequence();
+    lcd_clear();              // wyczyść pamięć wyświetlacza
+    gpio_put(LCD_BL_PIN, 1); // podświetlenie ON dopiero po wyczyszczeniu
 
     gui_font_width  = MainFont[0];
     gui_font_height = MainFont[1];
