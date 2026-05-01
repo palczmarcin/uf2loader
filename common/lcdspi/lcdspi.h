@@ -1,148 +1,82 @@
 #ifndef LCDSPI_H
 #define LCDSPI_H
+
 #include "pico/multicore.h"
 #include <hardware/spi.h>
+#include "config.h"
 
-//#define LCD_SPI_SPEED   6000000
-#define LCD_SPI_SPEED   25000000
-//#define LCD_SPI_SPEED 50000000
+// ST7789 — Display Pack 2.8" (320x240)
+#define LCD_WIDTH   320
+#define LCD_HEIGHT  240
+#define LCD_SPI_SPEED 40000000
 
-#define Pico_LCD_SCK 10 //
-#define Pico_LCD_TX  11 // MOSI
-#define Pico_LCD_RX  12 // MISO
-#define Pico_LCD_CS  13 //
-#define Pico_LCD_DC  14
-#define Pico_LCD_RST 15
+// ST7789 commands
+#define ST7789_NOP        0x00
+#define ST7789_SWRESET    0x01
+#define ST7789_SLPOUT     0x11
+#define ST7789_NORON      0x13
+#define ST7789_INVOFF     0x20
+#define ST7789_INVON      0x21
+#define ST7789_DISPOFF    0x28
+#define ST7789_DISPON     0x29
+#define ST7789_CASET      0x2A
+#define ST7789_RASET      0x2B
+#define ST7789_RAMWR      0x2C
+#define ST7789_MADCTL     0x36
+#define ST7789_COLMOD     0x3A
+#define ST7789_PORCTRL    0xB2
+#define ST7789_GCTRL      0xB7
+#define ST7789_VCOMS      0xBB
+#define ST7789_LCMCTRL    0xC0
+#define ST7789_VDVVRHEN   0xC2
+#define ST7789_VRHS       0xC3
+#define ST7789_VDVS       0xC4
+#define ST7789_FRCTRL2    0xC6
+#define ST7789_PWCTRL1    0xD0
+#define ST7789_PVGAMCTRL  0xE0
+#define ST7789_NVGAMCTRL  0xE1
 
-#define ILI9488  1
-#ifdef ILI9488
-#define LCD_WIDTH 320
-#define LCD_HEIGHT 320
-#endif
+// MADCTL bits
+#define MADCTL_MY   0x80
+#define MADCTL_MX   0x40
+#define MADCTL_MV   0x20
+#define MADCTL_BGR  0x08
 
-#define PIXFMT_BGR 1
+// Kolory RGB888 -> RGB565
+#define RGB565(r,g,b) ((((r)&0xF8)<<8)|(((g)&0xFC)<<3)|((b)>>3))
+#define BLACK       RGB565(0,   0,   0)
+#define WHITE       RGB565(255, 255, 255)
+#define RED         RGB565(255, 0,   0)
+#define GREEN       RGB565(0,   255, 0)
+#define BLUE        RGB565(0,   0,   255)
+#define YELLOW      RGB565(255, 255, 0)
+#define CYAN        RGB565(0,   255, 255)
+#define MAGENTA     RGB565(255, 0,   255)
+#define GRAY        RGB565(128, 128, 128)
+#define LITEGRAY    RGB565(210, 210, 210)
+#define ORANGE      RGB565(255, 165, 0)
 
-#define TFT_SLPOUT 0x11
-#define TFT_INVOFF 0x20
-#define TFT_INVON 0x21
+#define Pico_LCD_SPI_MOD spi0
 
-#define TFT_DISPOFF 0x28
-#define TFT_DISPON 0x29
-#define TFT_MADCTL 0x36
-
-#define ILI9341_MEMCONTROL 	0x36
-#define ILI9341_MADCTL_MX  	0x40
-#define ILI9341_MADCTL_BGR 	0x08
-
-#define ILI9341_COLADDRSET      0x2A
-#define ILI9341_PAGEADDRSET     0x2B
-#define ILI9341_MEMORYWRITE     0x2C
-#define ILI9341_RAMRD           0x2E
-
-#define ILI9341_Portrait        ILI9341_MADCTL_MX | ILI9341_MADCTL_BGR
-
-#define ORIENT_NORMAL       0
-
-#define RGB(red, green, blue) (unsigned int) (((red & 0b11111111) << 16) | ((green  & 0b11111111) << 8) | (blue & 0b11111111))
-#define WHITE               RGB(255,  255,  255) //0b1111
-#define YELLOW              RGB(255,  255,    0) //0b1110
-#define LILAC               RGB(255,  128,  255) //0b1101
-#define BROWN               RGB(255,  128,    0) //0b1100
-#define FUCHSIA             RGB(255,  64,   255) //0b1011
-#define RUST                RGB(255,  64,     0) //0b1010
-#define MAGENTA             RGB(255,  0,    255) //0b1001
-#define RED                 RGB(255,  0,      0) //0b1000
-#define CYAN                RGB(0,    255,  255) //0b0111
-#define GREEN               RGB(0,    255,    0) //0b0110
-#define CERULEAN            RGB(0,    128,  255) //0b0101
-#define MIDGREEN            RGB(0,    128,    0) //0b0100
-#define COBALT              RGB(0,    64,   255) //0b0011
-#define MYRTLE              RGB(0,    64,     0) //0b0010
-#define BLUE                RGB(0,    0,    255) //0b0001
-#define BLACK               RGB(0,    0,      0) //0b0000
-#define BROWN               RGB(255,  128,    0)
-#define GRAY                RGB(128,  128,    128)
-#define LITEGRAY            RGB(210,  210,    210)
-#define ORANGE            	RGB(0xff,	0xA5,	0)
-#define PINK				RGB(0xFF,	0xA0,	0xAB)
-#define GOLD				RGB(0xFF,	0xD7,	0x00)
-#define SALMON				RGB(0xFA,	0x80,	0x72)
-#define BEIGE				RGB(0xF5,	0xF5,	0xDC)
-
-//Pico spi0 or spi1 must match GPIO pins used above.
-#define Pico_LCD_SPI_MOD spi1
-#define nop asm("NOP")
-//xmit_byte_multi == HW1SendSPI
-
-
-#define PORTCLR             1
-#define PORTSET             2
-#define PORTINV             3
-#define LAT                 4
-#define LATCLR              5
-#define LATSET              6
-#define LATINV              7
-#define ODC                 8
-#define ODCCLR              9
-#define ODCSET              10
-#define CNPU                12
-#define CNPUCLR             13
-#define CNPUSET             14
-#define CNPUINV             15
-#define CNPD                16
-#define CNPDCLR             17
-#define CNPDSET             18
-
-#define ANSELCLR            -7
-#define ANSELSET            -6
-#define ANSELINV            -5
-#define TRIS                -4
-#define TRISCLR             -3
-#define TRISSET             -2
-
-extern void __not_in_flash_func(spi_write_fast)(spi_inst_t *spi, const uint8_t *src, size_t len);
-extern void __not_in_flash_func(spi_finish)(spi_inst_t *spi);
-extern void hw_read_spi(unsigned char *buff, int cnt);
-extern void hw_send_spi(const unsigned char *buff, int cnt);
-extern unsigned char __not_in_flash_func(hw1_swap_spi)(unsigned char data_out);
-
-extern void lcd_spi_raise_cs(void);
-extern void lcd_spi_lower_cs(void);
-extern void spi_write_data(unsigned char data);
-extern void spi_write_command(unsigned char data);
-extern void spi_write_cd(unsigned char command, int data, ...);
-extern void spi_write_data24(uint32_t data);
-
-extern void spi_draw_pixel(uint16_t x, uint16_t y, uint16_t color) ;
-extern void lcd_putc(uint8_t devn, uint8_t c);
-extern int  lcd_getc(uint8_t devn);
-extern void lcd_sleeping(uint8_t devn);
-
-
-void draw_rect_spi(int x1, int y1, int x2, int y2, int c);
-void define_region_spi(int xstart, int ystart, int xend, int yend, int rw);
-void draw_line_spi(int x1, int y1, int x2, int y2, int color);
+// Publiczne API (zachowane dla kompatybilności z resztą uf2loadera)
+void lcd_init(void);
+void lcd_clear(void);
+void lcd_set_cursor(int x, int y);
+void lcd_print_string(char *s);
 void lcd_print_string_color(char *s, int fg, int bg);
+void draw_rect_spi(int x1, int y1, int x2, int y2, int color);
+void draw_line_spi(int x1, int y1, int x2, int y2, int color);
+void draw_bitmap_spi(int x1, int y1, int width, int height, int scale,
+                     int fc, int bc, unsigned char *bitmap);
 void draw_battery_icon(int x0, int y0, int level);
-//Print the bitmap of a char on the video output
-//    x, y - the top left of the char
-//    width, height - size of the char's bitmap
-//    scale - how much to scale the bitmap
-//	  fc, bc - foreground and background colour
-//    bitmap - pointer to the bitmap
-void draw_bitmap_spi(int x1, int y1, int width, int height, int scale, int fc, int bc, unsigned char *bitmap);
-void draw_buffer_spi(int x1, int y1, int x2, int y2, unsigned char *p);
+void lcd_putc(uint8_t devn, uint8_t c);
+int  lcd_getc(uint8_t devn);
 
+// Niskopoziomowe SPI
+void lcd_spi_raise_cs(void);
+void lcd_spi_lower_cs(void);
+void hw_send_spi(const unsigned char *buff, int cnt);
+void spi_write_command(unsigned char cmd);
+void spi_write_data(unsigned char data);
 
-extern char lcd_put_char(char c, int flush);
-extern void lcd_print_string(char* s);
-
-extern void lcd_spi_init();
-extern void lcd_init();
-extern void lcd_clear();
-extern void reset_controller(void);
-extern void pin_set_bit(int pin, unsigned int offset);
-
-extern void lcd_set_cursor(int x, int y);
-
-#endif
+#endif // LCDSPI_H
