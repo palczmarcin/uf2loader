@@ -77,37 +77,45 @@ static void st7789_set_window(int x1, int y1, int x2, int y2) {
 }
 
 static void st7789_init_sequence(void) {
-    spi_write_command(ST7789_SWRESET);
+    spi_write_command(0x01); // SWRESET
     sleep_ms(150);
 
-    spi_write_command(ST7789_SLPOUT);
-    sleep_ms(10);
+    spi_write_command(0x35); // TEON — enable frame sync
+    
+    write_cmd_data(0x3A, (uint8_t[]){0x05}, 1); // COLMOD — 16-bit RGB565
+    write_cmd_data(0xB2, (uint8_t[]){0x0C, 0x0C, 0x00, 0x33, 0x33}, 5); // PORCTRL
+    write_cmd_data(0xC0, (uint8_t[]){0x2C}, 1); // LCMCTRL
+    write_cmd_data(0xC2, (uint8_t[]){0x01}, 1); // VDVVRHEN
+    write_cmd_data(0xC3, (uint8_t[]){0x12}, 1); // VRHS
+    write_cmd_data(0xC4, (uint8_t[]){0x20}, 1); // VDVS
+    write_cmd_data(0xD0, (uint8_t[]){0xA4, 0xA1}, 2); // PWCTRL1
+    write_cmd_data(0xC6, (uint8_t[]){0x0F}, 1); // FRCTRL2
+    write_cmd_data(0xB0, (uint8_t[]){0x00, 0xC0}, 2); // RAMCTRL — fixes green banding
 
-    write_cmd_data(ST7789_COLMOD,   (uint8_t[]){0x55}, 1); // 16-bit RGB565
-    write_cmd_data(ST7789_MADCTL,   (uint8_t[]){MADCTL_MX | MADCTL_BGR}, 1);
-    write_cmd_data(ST7789_PORCTRL,  (uint8_t[]){0x0C, 0x0C, 0x00, 0x33, 0x33}, 5);
-    write_cmd_data(ST7789_GCTRL,    (uint8_t[]){0x35}, 1);
-    write_cmd_data(ST7789_VCOMS,    (uint8_t[]){0x19}, 1);
-    write_cmd_data(ST7789_LCMCTRL, (uint8_t[]){0x2C}, 1);
-    write_cmd_data(ST7789_VDVVRHEN,(uint8_t[]){0x01}, 1);
-    write_cmd_data(ST7789_VRHS,    (uint8_t[]){0x12}, 1);
-    write_cmd_data(ST7789_VDVS,    (uint8_t[]){0x20}, 1);
-    write_cmd_data(ST7789_FRCTRL2, (uint8_t[]){0x0F}, 1);
-    write_cmd_data(ST7789_PWCTRL1, (uint8_t[]){0xA4, 0xA1}, 2);
+    // Gamma dla 320x240 (Pico Display 2.0 / 2.8")
+    write_cmd_data(0xB7, (uint8_t[]){0x35}, 1); // GCTRL
+    write_cmd_data(0xBB, (uint8_t[]){0x1F}, 1); // VCOMS
+    write_cmd_data(0xE0, (uint8_t[]){
+        0xD0, 0x08, 0x11, 0x08, 0x0C, 0x15, 0x39, 0x33,
+        0x50, 0x36, 0x13, 0x14, 0x29, 0x2D
+    }, 14); // GMCTRP1
+    write_cmd_data(0xE1, (uint8_t[]){
+        0xD0, 0x08, 0x10, 0x08, 0x06, 0x06, 0x39, 0x44,
+        0x51, 0x0B, 0x16, 0x14, 0x2F, 0x31
+    }, 14); // GMCTRN1
 
-    write_cmd_data(ST7789_PVGAMCTRL, (uint8_t[]){
-        0xD0,0x04,0x0D,0x11,0x13,0x2B,0x3F,0x54,0x4C,0x18,0x0D,0x0B,0x1F,0x23
-    }, 14);
-    write_cmd_data(ST7789_NVGAMCTRL, (uint8_t[]){
-        0xD0,0x04,0x0C,0x11,0x13,0x2C,0x3F,0x44,0x51,0x2F,0x1F,0x1F,0x20,0x23
-    }, 14);
+    spi_write_command(0x21); // INVON
+    spi_write_command(0x11); // SLPOUT
+    sleep_ms(10);
+    spi_write_command(0x29); // DISPON
+    sleep_ms(100);
 
-    spi_write_command(ST7789_INVON);
-    sleep_ms(10);
-    spi_write_command(ST7789_NORON);
-    sleep_ms(10);
-    spi_write_command(ST7789_DISPON);
-    sleep_ms(10);
+    // MADCTL dla 320x240 — COL_ORDER | SWAP_XY | SCAN_ORDER
+    write_cmd_data(0x36, (uint8_t[]){0x04 | 0x20 | 0x10}, 1);
+
+    // CASET 0-319, RASET 0-239
+    write_cmd_data(0x2A, (uint8_t[]){0x00, 0x00, 0x01, 0x3F}, 4);
+    write_cmd_data(0x2B, (uint8_t[]){0x00, 0x00, 0x00, 0xEF}, 4);
 }
 
 void lcd_spi_init(void) {
