@@ -10,7 +10,6 @@
 #include "pico/stdlib.h"
 
 #include "lcdspi.h"
-#include "config.h"
 #include "fonts/font1.h"
 
 unsigned char *MainFont = (unsigned char *) font1;

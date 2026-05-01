@@ -3,9 +3,17 @@
 
 #include "pico/multicore.h"
 #include <hardware/spi.h>
-#include "config.h"
 
 // ST7789 — Display Pack 2.8" (320x240)
+// Piny SPI0
+#define LCD_SCK_PIN     2
+#define LCD_MOSI_PIN    0
+#define LCD_CS_PIN      1
+#define LCD_DC_PIN      3
+#define LCD_BL_PIN      20
+// Brak LCD_RST_PIN — RESET tied to RUN
+// Brak LCD_MISO_PIN — Display Pack nie ma MISO
+
 #define LCD_WIDTH   320
 #define LCD_HEIGHT  240
 #define LCD_SPI_SPEED 40000000
