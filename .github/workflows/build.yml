@@ -1,88 +1,54 @@
-name: CMake
+name: Build
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
 permissions:
   contents: write
-env:
-  BUILD_TYPE: Release
 
 jobs:
   build:
-    strategy:
-      matrix:
-        board: [pico, pico2]
-
-    name: Build UF2 artifacts (pico2)
     runs-on: ubuntu-latest
 
-    env:
-      PICO_SDK_PATH: ${{github.workspace}}/pico-sdk
-
     steps:
-    - name: Compiler Cache
-      uses: actions/cache@v4
-      with:
-        path: /home/runner/.ccache
-        key: ccache-cmake-${{github.ref}}-${{github.sha}}
-        restore-keys: |
-          ccache-cmake-${{github.ref}}
-          ccache-cmake
-
-    - name: Checkout Code
+    - name: Checkout
       uses: actions/checkout@v4
       with:
-        path: src
         submodules: recursive
 
-    - name: Checkout Pico SDK
-      uses: actions/checkout@v4
-      with:
-        ref: '2.2.0'
-        repository: raspberrypi/pico-sdk
-        path: pico-sdk
-        submodules: true
-
-    - name: Install Arm GNU Toolchain (arm-none-eabi-gcc)
-      uses: carlosperate/arm-none-eabi-gcc-action@v1
-      with:
-        release: '13.3.Rel1'
-
-    - name: Install CCache
-      run: sudo apt update && sudo apt install -y ccache
-
-    - name: Configure CMake
+    - name: Clone pimoroni-pico
       run: |
-        cmake -E make_directory ${{runner.workspace}}/build
-        cmake -S ${{github.workspace}}/src -B ${{runner.workspace}}/build \
-          -DPICO_SDK_PATH=${{github.workspace}}/pico-sdk \
-          -DPICO_BOARD=${{matrix.board}} \
-          -DCMAKE_C_COMPILER_LAUNCHER=ccache \
-          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+        git clone https://github.com/pimoroni/pimoroni-pico.git --depth 1
+        cd pimoroni-pico
+        git submodule update --init --recursive
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cmake gcc-arm-none-eabi libnewlib-arm-none-eabi build-essential
+
+    - name: Install Pico SDK
+      run: |
+        git clone https://github.com/raspberrypi/pico-sdk.git --branch 2.1.0 --depth 1
+        cd pico-sdk
+        git submodule update --init --recursive
 
     - name: Build
-      working-directory: ${{runner.workspace}}/build
       run: |
-        ccache --zero-stats || true
-        cmake --build . --config $BUILD_TYPE -j$(nproc)
-        ccache --show-stats || true
+        export PICO_SDK_PATH=${{ github.workspace }}/pico-sdk
+        cmake -DPICO_BOARD=pico2_w -B build -S .
+        cd build
+        make -j$(nproc)
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: uf2loader-${{matrix.board}}
-        path: ${{runner.workspace}}/output/*.uf2
-
-    # ── Update rolling latest release ────────────────────────────────────────
-    - name: Update latest release
-      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-      uses: softprops/action-gh-release@v2
-      with:
-        tag_name: latest
-        name: Latest Build
-        prerelease: true
-        make_latest: 'true'
-        files: ${{runner.workspace}}/output/*.uf2
+        name: uf2loader-pico2w
+        path: |
+          build/**/*.uf2
+          build/**/*.bin
+        retention-days: 30
