@@ -1,52 +1,35 @@
-# Generated Cmake Pico project file
-
 cmake_minimum_required(VERSION 3.13)
 
-set(CMAKE_C_STANDARD 11)
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+# Wersja
+set(VERSION_MAJOR 1)
+set(VERSION_MINOR 0)
+set(VERSION_PATCH 0)
+set(VERSION_STRING "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
 
-set(CMAKE_BUILD_TYPE "MinSizeRel")
-set(CMAKE_EXE_LINKER_FLAGS_MINSIZEREL "-specs=nano.specs")
-
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../output)
-
-set(PROJECT_VERSION "2.5")
-set(VERSION_STRING "${PROJECT_VERSION}")
-
-# Initialise pico_sdk from installed location
-# (note this can come from environment, CMake cache etc)
-
-# == DO NOT EDIT THE FOLLOWING LINES for the Raspberry Pi Pico VS Code Extension to work ==
-if(WIN32)
-    set(USERHOME $ENV{USERPROFILE})
-else()
-    set(USERHOME $ENV{HOME})
-endif()
-set(sdkVersion 2.2.0)
-set(toolchainVersion 14_2_Rel1)
-set(picotoolVersion 2.2.0)
-set(picoVscode ${USERHOME}/.pico-sdk/cmake/pico-vscode.cmake)
-if (EXISTS ${picoVscode})
-    include(${picoVscode})
-endif()
-# ====================================================================================
-set(PICO_BOARD pico2 CACHE STRING "Board type")
-
-# Pull in Raspberry Pi Pico SDK (must be before project)
+# Pico SDK
 include(pico_sdk_import.cmake)
 
-project(sdboot)
+project(uf2loader C CXX ASM)
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 
-# Initialise the Raspberry Pi Pico SDK
 pico_sdk_init()
 
-add_subdirectory(common/i2ckbd i2ckbd)
-add_subdirectory(common/bootloader bootloader)
-add_subdirectory(common/lcdspi lcdspi)
-add_subdirectory(common/petit_fatfs petit_fatfs)
+# --- Pimoroni Pico SDK ---
+# Dodaj pimoroni-pico jako submoduł
+set(PIMORONI_PICO_PATH ${CMAKE_CURRENT_LIST_DIR}/pimoroni-pico)
+set(PICO_BOARD_HEADER_DIRS ${PIMORONI_PICO_PATH})
 
+include(${PIMORONI_PICO_PATH}/pimoroni_pico_import.cmake)
+
+# Tylko potrzebne komponenty Pimoroni
+include(${PIMORONI_PICO_PATH}/drivers/st7789/st7789)
+include(${PIMORONI_PICO_PATH}/libraries/pico_graphics/pico_graphics)
+
+# --- Podkatalogi uf2loader ---
+add_subdirectory(common/bootloader)
+add_subdirectory(common/lcdspi)
+add_subdirectory(common/petit_fatfs)
 add_subdirectory(stage3)
 add_subdirectory(ui)
 add_subdirectory(diag)
-
