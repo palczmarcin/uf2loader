@@ -38,7 +38,7 @@ target_link_libraries(st7789
 add_library(pico_graphics STATIC
     ${PIMORONI_PICO_PATH}/libraries/pico_graphics/pico_graphics.cpp
     ${PIMORONI_PICO_PATH}/libraries/pico_graphics/pico_graphics_pen_1bit.cpp
-    #${PIMORONI_PICO_PATH}/libraries/pico_graphics/pico_graphics_pen_p2.cpp
+    ${PIMORONI_PICO_PATH}/libraries/pico_graphics/pico_graphics_pen_p2.cpp
     ${PIMORONI_PICO_PATH}/libraries/pico_graphics/pico_graphics_pen_p4.cpp
     ${PIMORONI_PICO_PATH}/libraries/pico_graphics/pico_graphics_pen_p8.cpp
     ${PIMORONI_PICO_PATH}/libraries/pico_graphics/pico_graphics_pen_rgb332.cpp
