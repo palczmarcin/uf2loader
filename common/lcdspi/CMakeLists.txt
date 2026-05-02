@@ -1,20 +1,18 @@
-# Generated Cmake Pico project file
+add_library(lcdspi STATIC
+    lcdspi.cpp
+)
 
-cmake_minimum_required(VERSION 3.13)
+target_include_directories(lcdspi PUBLIC
+    ${CMAKE_CURRENT_LIST_DIR}
+    ${CMAKE_CURRENT_LIST_DIR}/../../
+)
 
-set(CMAKE_C_STANDARD 11)
-
-project(lcdspi
-        VERSION 0.0.1
-        DESCRIPTION "lcdspi for picocalc"
-        )
-
-add_library(lcdspi INTERFACE)
-
-target_sources(lcdspi INTERFACE
-        lcdspi.c
-        )
-
-target_link_libraries(lcdspi INTERFACE  pico_stdlib hardware_spi)
-
-target_include_directories(lcdspi INTERFACE ${CMAKE_CURRENT_LIST_DIR})
+target_link_libraries(lcdspi
+    pico_stdlib
+    hardware_spi
+    hardware_gpio
+    hardware_pwm
+    hardware_dma
+    st7789        # sterownik Pimoroni
+    pico_graphics # biblioteka graficzna Pimoroni
+)
