@@ -83,8 +83,8 @@ static void st7789_init(void) {
     // COLMOD: 16-bit RGB565
     cmd_data(0x3A, (uint8_t[]){0x05}, 1);
 
-    // MADCTL: MX + BGR dla Display Pack 2.8" (landscape 320x240)
-    cmd_data(0x36, (uint8_t[]){0x00}, 1);
+    // MADCTL: MX+MY+MV+BGR = landscape 320x240 dla Display Pack 2.8"
+    cmd_data(0x36, (uint8_t[]){0x70}, 1);
 
     // PORCTRL
     cmd_data(0xB2, (uint8_t[]){0x0C,0x0C,0x00,0x33,0x33}, 5);
@@ -146,7 +146,7 @@ static void st7789_init(void) {
 
 void lcd_init(void) {
     // SPI0 @ 40MHz
-    spi_init(spi0, 40 * 1000 * 1000);
+    spi_init(spi0, 10 * 1000 * 1000);
     spi_set_format(spi0, 8, SPI_CPOL_0, SPI_CPHA_0, SPI_MSB_FIRST);
 
     gpio_set_function(PIN_SCK,  GPIO_FUNC_SPI);
