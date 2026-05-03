@@ -3,45 +3,35 @@
 
 #include <stdbool.h>
 
-// Display Pack 2.8" ma rozdzielczość 320x240
-// Oryginalny PicoCalc miał 320x320 — nadpisujemy jego lokalne definicje
-
-// Undef żeby uniknąć konfliktu z lokalnymi definicjami w text_directory_ui.c
-#undef UI_WIDTH
-#undef UI_HEIGHT
-#undef UI_X
-#undef UI_Y
+// Display Pack 2.8" — 320x240
+// Oryginał PicoCalc miał 320x320
 
 #define SCREEN_WIDTH    320
 #define SCREEN_HEIGHT   240
 
-// Obszar UI — pełny ekran minus marginesy
+// Obszar UI — używaj tych zamiast oryginalnych 280x280
+#undef UI_WIDTH
+#undef UI_HEIGHT
+#undef UI_X
+#undef UI_Y
 #define UI_WIDTH        300
 #define UI_HEIGHT       220
 #define UI_X            10
 #define UI_Y            10
 
-// Czcionka z font1.h — 8x8
-#define FONT_WIDTH      8
-#define FONT_HEIGHT     8
-#define ENTRY_PADDING   2
+// FONT_HEIGHT i BAT_UPDATE_MS — NIE redefiniujemy
+// text_directory_ui.h definiuje FONT_HEIGHT 12 i BAT_UPDATE_MS 60000
+// zostawiamy ich wartości bez zmian
 
-// Ile pozycji mieści się na stronie
-// Dostępna wysokość: 220 - 20 - 16 - 16 = 168px / (8 + 2) = 16
-#define ITEMS_PER_PAGE  16
+// Ile pozycji mieści się na stronie przy FONT_HEIGHT=12
+// Dostępna wysokość: 220 - 20 - 14 - 14 = 172px / 14 = 12 pozycji
+#define ITEMS_PER_PAGE  12
 
-// Aktualizacja ikony baterii co N ms
-// Display Pack nie ma baterii — bardzo długi interwał
-#define BAT_UPDATE_MS   3600000
-
-// Deklaracje funkcji SD — zdefiniowane w main.c
+// Deklaracje funkcji SD i filesystem — zdefiniowane w main.c
 extern bool sd_insert_state;
 bool sd_card_inserted(void);
-
-// Deklaracje funkcji filesystem — zdefiniowane w main.c
 bool fs_init(void);
 void fs_deinit(void);
 void reboot(void);
 
 #endif // UI_H
-
