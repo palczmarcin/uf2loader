@@ -1,6 +1,11 @@
 project(diag C CXX ASM)
 
-add_executable(diag diag.c)
+# Kompilujemy lcdspi.c bezpośrednio w diag zamiast linkować bibliotekę
+# żeby uniknąć duplikacji symboli pico_stdlib
+add_executable(diag
+    diag.c
+    ../common/lcdspi/lcdspi.c
+)
 
 pico_set_program_name(diag "bl-diagnostic")
 pico_set_program_description(diag "Diagnostics for uf2loader")
@@ -29,8 +34,7 @@ target_link_libraries(diag
     hardware_gpio
     hardware_spi
     petit_fatfs
-    lcdspi
-    # i2ckbd USUNIĘTE
+    # lcdspi USUNIĘTE - kompilujemy .c bezpośrednio
 )
 
 target_include_directories(diag PRIVATE
