@@ -42,11 +42,11 @@
 
 #include "sdmmc.h"
 
-#define SD_SPICH spi0
-#define SD_SPI_MISO 16
-#define SD_SPI_CS 17
-#define SD_SPI_SCK 18
-#define SD_SPI_MOSI 19
+#define SD_SPICH spi1
+#define SD_SPI_MISO 12
+#define SD_SPI_CS   13
+#define SD_SPI_SCK  10
+#define SD_SPI_MOSI 11
 
 #define SD_SPI_BAUDRATE_INIT (400 * 1000)
 #define SD_SPI_BAUDRATE (20 * 1000 * 1000)
