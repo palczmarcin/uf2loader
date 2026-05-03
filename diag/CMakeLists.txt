@@ -6,7 +6,6 @@ pico_set_program_name(diag "bl-diagnostic")
 pico_set_program_description(diag "Diagnostics for uf2loader")
 pico_set_program_version(diag "${VERSION_STRING}")
 
-# Modify the below lines to enable/disable output over UART/USB
 pico_enable_stdio_uart(diag 0)
 pico_enable_stdio_usb(diag 0)
 pico_enable_stdio_rtt(diag 0)
@@ -22,21 +21,21 @@ endif()
 pico_add_extra_outputs(diag)
 
 target_compile_definitions(diag PRIVATE
-    #ENABLE_DEBUG=1 # requires at least 20k of flash
+    #ENABLE_DEBUG=1
 )
 
-# Add the standard library to the build
 target_link_libraries(diag
     pico_stdlib
     hardware_gpio
+    hardware_spi
     petit_fatfs
-    i2ckbd
     lcdspi
+    # i2ckbd USUNIĘTE
 )
 
-# Add the standard include files to the build
 target_include_directories(diag PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}
+    ${CMAKE_CURRENT_LIST_DIR}/../common/lcdspi
 )
 
 target_link_options(diag PRIVATE -Wl,--print-memory-usage)
