@@ -1,10 +1,16 @@
 #include <pico.h>
 #include <pico/time.h>
-
-#include "i2ckbd.h"
+#include <hardware/gpio.h>
 
 #include "lcdspi.h"
 #include "pff.h"
+// i2ckbd.h USUNIĘTE — zastąpione przyciskami GPIO
+
+// Piny przycisków Display Pack 2.8"
+#define BTN_UP    6
+#define BTN_DOWN  7
+#define BTN_ENTER 8
+#define BTN_BACK  9
 
 void _Noreturn infinite_loop(void) {
   while (1) {
@@ -13,52 +19,32 @@ void _Noreturn infinite_loop(void) {
 }
 
 #if PICO_RP2040
-
 #define LOADER "BOOT2040.UF2"
-
 #elif PICO_RP2350
-
 #define LOADER "BOOT2350.UF2"
-
 #endif
 
-#define KEY_UP 0xb5
-#define KEY_DOWN 0xb6
-#define KEY_F1 0x81
-#define KEY_F2 0x82
-#define KEY_F3 0x83
-#define KEY_F4 0x84
-#define KEY_F5 0x85
-#define KEY_ENTER 0x0A
+#define UI_X      20
+#define UI_Y(l)   (20 + 12 * (l))
+#define STEP_Y(l) (UI_Y((l) + 4))
 
-char *read_bootmode() {
-  int key;
-  int end_time = time_us_32() + 500000; // 0.5s
-
-#define Q(x) #x "  "
-#define KEY(x)                                                                 \
-  case KEY_##x:                                                                \
-    return Q(x);
-
-  while (((int)time_us_32() - end_time) < 0) {
-    key = read_i2c_kbd();
-    switch (key) {
-      KEY(UP);
-      KEY(DOWN);
-      KEY(F1);
-      KEY(F3);
-      KEY(F5);
-    }
-  }
-
-  return "NONE";
+static void init_buttons(void) {
+  gpio_init(BTN_UP);    gpio_set_dir(BTN_UP,    GPIO_IN); gpio_pull_up(BTN_UP);
+  gpio_init(BTN_DOWN);  gpio_set_dir(BTN_DOWN,  GPIO_IN); gpio_pull_up(BTN_DOWN);
+  gpio_init(BTN_ENTER); gpio_set_dir(BTN_ENTER, GPIO_IN); gpio_pull_up(BTN_ENTER);
+  gpio_init(BTN_BACK);  gpio_set_dir(BTN_BACK,  GPIO_IN); gpio_pull_up(BTN_BACK);
 }
 
-#define UI_X (20)
-
-#define UI_Y(line) (20 + 12 * (line))
-
-#define STEP_Y(line) (UI_Y(line + 4))
+char *read_bootmode(void) {
+  int end_time = time_us_32() + 500000;
+  while (((int)time_us_32() - end_time) < 0) {
+    if (!gpio_get(BTN_UP))    return "UP   ";
+    if (!gpio_get(BTN_DOWN))  return "DOWN ";
+    if (!gpio_get(BTN_ENTER)) return "ENTER";
+    if (!gpio_get(BTN_BACK))  return "BACK ";
+  }
+  return "NONE ";
+}
 
 static inline void fail(int step) {
   lcd_set_cursor(UI_X + 200, STEP_Y(step));
@@ -74,7 +60,6 @@ static inline void pass(int step) {
 static inline void check_keypress(void) {
   char *keypress = read_bootmode();
   lcd_set_cursor(UI_X + 200, UI_Y(8));
-  // draw_rect_spi(UI_X+200, UI_Y(8), 320, UI_Y(9), BLACK);
   lcd_print_string_color(keypress, GREEN, BLACK);
 }
 
@@ -85,8 +70,7 @@ int main() {
   stdio_init_all();
 #endif
 
-  init_i2c_kbd();
-
+  init_buttons();
   lcd_init();
 
   lcd_set_cursor(UI_X, UI_Y(0));
@@ -105,40 +89,23 @@ int main() {
   FATFS fs;
   FRESULT fr = FR_NOT_READY;
 
-  // seems to take a couple of attempts from cold start
   for (int retry = 5; retry > 0; retry--) {
     fr = pf_mount(&fs);
-
-    if (fr == FR_OK) {
-      break;
-    }
-
+    if (fr == FR_OK) break;
     sleep_ms(500);
   }
 
-  if (fr != FR_OK) {
-    fail(0);
-  }
-
+  if (fr != FR_OK) fail(0);
   pass(0);
 
   fr = pf_open(filename);
-
-  if (fr != FR_OK) {
-    fail(1);
-  }
-
+  if (fr != FR_OK) fail(1);
   pass(1);
 
   char buffer[512];
   unsigned int btr;
-
   fr = pf_read(buffer, sizeof(buffer), &btr);
-
-  if (fr != FR_OK || btr != sizeof(buffer)) {
-    fail(2);
-  }
-
+  if (fr != FR_OK || btr != sizeof(buffer)) fail(2);
   pass(2);
 
   lcd_set_cursor(UI_X, UI_Y(8));
