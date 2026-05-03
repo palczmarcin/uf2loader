@@ -16,7 +16,6 @@ pico_sdk_init()
 # --- Pimoroni ST7789 driver ---
 set(PIMORONI_PICO_PATH ${CMAKE_CURRENT_LIST_DIR}/pimoroni-pico)
 
-# Zbierz wszystkie pliki źródłowe pico_graphics automatycznie
 file(GLOB PICO_GRAPHICS_SOURCES
     ${PIMORONI_PICO_PATH}/libraries/pico_graphics/*.cpp
 )
@@ -35,6 +34,8 @@ target_link_libraries(st7789
     hardware_spi
     hardware_pwm
     hardware_dma
+    hardware_pio
+    hardware_gpio
 )
 
 add_library(pico_graphics STATIC
