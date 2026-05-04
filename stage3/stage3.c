@@ -10,10 +10,10 @@
 #include "debug.h"
 
 // Piny przycisków Display Pack 2.8"
-#define BTN_UP    6   // SW_A — wejście w menu / SD
-#define BTN_DOWN  7   // SW_B — BOOTSEL
-#define BTN_ENTER 8   // SW_X
-#define BTN_BACK  9   // SW_Y
+#define BTN_UP    12   // SW_A — wejście w menu / SD
+#define BTN_DOWN  13   // SW_B — BOOTSEL
+#define BTN_ENTER 14   // SW_X
+#define BTN_BACK  15   // SW_Y
 
 void _Noreturn infinite_loop(void)
 {
