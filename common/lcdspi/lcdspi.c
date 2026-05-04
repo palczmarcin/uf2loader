@@ -80,10 +80,12 @@ static void st7789_init(void) {
     // Sleep out
     write_cmd(0x11); sleep_ms(10);
 
-    // COLMOD: 16-bit RGB565
-    cmd_data(0x3A, (uint8_t[]){0x05}, 1);
+    // COLMOD: 16-bit RGB565 (0x55 = 65K color dla obu interfejsów)
+    cmd_data(0x3A, (uint8_t[]){0x55}, 1);
+    sleep_ms(10);
 
-    // MADCTL: MX+MY+MV+BGR = landscape 320x240 dla Display Pack 2.8"
+    // MADCTL: COL_ORDER | SWAP_XY | SCAN_ORDER = landscape 320x240
+    // Pimoroni Display Pack 2.8" standard
     cmd_data(0x36, (uint8_t[]){0x70}, 1);
 
     // PORCTRL
