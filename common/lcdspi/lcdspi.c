@@ -13,10 +13,10 @@
 #include "fonts/font1.h"
 
 // --- Piny ---
-#define PIN_MOSI  0
-#define PIN_CS    1
-#define PIN_SCK   2
-#define PIN_DC    3
+#define PIN_MOSI  19
+#define PIN_CS    17
+#define PIN_SCK   18
+#define PIN_DC    16
 #define PIN_BL    20
 
 // --- Wymiary ---
