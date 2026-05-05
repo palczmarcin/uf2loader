@@ -13,10 +13,10 @@
 #include "fonts/font1.h"
 
 // --- Piny ---
-#define PIN_MOSI  19
-#define PIN_CS    17
-#define PIN_SCK   18
-#define PIN_DC    16
+#define PIN_MOSI  0
+#define PIN_CS    1
+#define PIN_SCK   2
+#define PIN_DC    3
 #define PIN_BL    20
 
 // --- Wymiary ---
@@ -166,8 +166,8 @@ void lcd_init(void) {
     // Podświetlenie ON po inicjalizacji
     gpio_put(PIN_BL, 1);
 
-    fw = Font[0];
-    fh = Font[1];
+    fw = Font[0];  // szerokość znaku = 8
+    fh = Font[1];  // wysokość znaku = 12
 }
 
 void lcd_clear(void) {
@@ -217,7 +217,11 @@ void draw_line_spi(int x1, int y1, int x2, int y2, int color) {
 void lcd_set_cursor(int x, int y) { cur_x=x; cur_y=y; }
 
 static void draw_char(int x, int y, char c, int fg, int bg) {
-    unsigned char *bmp = Font + 2 + (uint8_t)c * ((fw*fh+7)/8);
+    // Font header: [0]=width, [1]=height, [2]=first_char, [3]=last_char
+    // Dane znaków zaczynają się od bajtu 4
+    int first_char = Font[2]; // 0x20 = spacja
+    int char_bytes = (fw * fh + 7) / 8;
+    unsigned char *bmp = Font + 4 + ((uint8_t)c - first_char) * char_bytes;
     uint16_t fg_be = __builtin_bswap16((uint16_t)fg);
     uint16_t bg_be = __builtin_bswap16((uint16_t)bg);
     set_window(x, y, x+fw-1, y+fh-1);
