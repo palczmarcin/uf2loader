@@ -19,7 +19,6 @@
 
 #include "hardware/gpio.h"
 #include "debug.h"
-#include "i2ckbd.h"
 #include "lcdspi.h"
 #include <hardware/flash.h>
 #include <hardware/watchdog.h>
