@@ -18,6 +18,7 @@
 #include <errno.h>
 
 #include "hardware/gpio.h"
+#include "hardware/uart.h"
 #include "debug.h"
 #include "lcdspi.h"
 #include <hardware/flash.h>
