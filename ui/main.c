@@ -109,6 +109,10 @@ void load_firmware_by_path(const char *path)
 
 void final_selection_callback(const char *path)
 {
+  // WAŻNE: kopiujemy ścieżkę na własny bufor zaraz na wejściu
+  // bo 'path' wskazuje na lokalny bufor w text_directory_ui.c
+  // który może być nadpisany przez kolejne wywołania funkcji
+  static char path_copy[128];
   char status_message[128];
   const char *extension = ".uf2";
 
@@ -118,24 +122,26 @@ void final_selection_callback(const char *path)
     reboot();
   }
 
-  // Trigger firmware loading with the selected path
-  DEBUG_PRINT("selected: %s\n", path);
+  strlcpy(path_copy, path, sizeof(path_copy));
 
-  size_t path_len = strlen(path);
+  // Trigger firmware loading with the selected path
+  DEBUG_PRINT("selected: %s\n", path_copy);
+
+  size_t path_len = strlen(path_copy);
   size_t ext_len = strlen(extension);
 
-  if (path_len < ext_len || strcmp(path + path_len - ext_len, extension) != 0)
+  if (path_len < ext_len || strcmp(path_copy + path_len - ext_len, extension) != 0)
   {
-    DEBUG_PRINT("not a uf2: %s\n", path);
+    DEBUG_PRINT("not a uf2: %s\n", path_copy);
     snprintf(status_message, sizeof(status_message), "ERR: File must be .uf2");
     text_directory_ui_set_status(status_message);
     return;
   }
 
-  snprintf(status_message, sizeof(status_message), "SEL: %s", path);
+  snprintf(status_message, sizeof(status_message), "Loading: %s", path_copy);
   text_directory_ui_set_status(status_message);
 
-  load_firmware_by_path(path);
+  load_firmware_by_path(path_copy);
 }
 
 int main()
