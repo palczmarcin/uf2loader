@@ -1,5 +1,5 @@
 /**
- * PicoCalc UF2 Loader
+ * Pico2W UF2 Loader
  *
  * Originally by : Hsuan Han Lai
  * Email: hsuan.han.lai@gmail.com
@@ -43,10 +43,10 @@
 #endif
 
 // UI Layout Constants
-#define UI_WIDTH 280
-#define UI_HEIGHT 280
-#define UI_X 20  // Offset from top-left
-#define UI_Y 20
+#define UI_WIDTH 300
+#define UI_HEIGHT 200
+#define UI_X 10  // Offset from top-left
+#define UI_Y 10
 #define HEADER_TITLE_HEIGHT 20  // Height for the title header
 #define PATH_HEADER_HEIGHT 16   // Height for the current path display
 #define STATUS_BAR_HEIGHT 16    // Height for the status bar
@@ -245,7 +245,7 @@ static void load_directory(const char *path)
 static void ui_draw_title(void)
 {
   draw_rect_spi(UI_X, UI_Y, UI_X + UI_WIDTH - 1, UI_Y + HEADER_TITLE_HEIGHT, BLACK);
-  draw_text(UI_X + 2, UI_Y + 2, "PicoCalc UF2 Loader " PICO_PROGRAM_VERSION_STRING, WHITE, BLACK);
+  draw_text(UI_X + 2, UI_Y + 2, "Pico2W UF2 Loader " PICO_PROGRAM_VERSION_STRING, WHITE, BLACK);
 }
 
 static void ui_draw_empty_tip()
@@ -478,14 +478,14 @@ static void ui_set_default_status()
 {
   if (entry_count == 0)
   {
-    text_directory_ui_set_status("Enter to load.");
+    text_directory_ui_set_status("Y to load.");
     ui_draw_empty_tip();
   }
   else
   {
     if (sd_insert_state)
     {
-      text_directory_ui_set_status("Up/Down to select, Enter to load.");
+      text_directory_ui_set_status("Up/Down to select, Y to load.");
       // ui_draw_status_bar();
     }
   }

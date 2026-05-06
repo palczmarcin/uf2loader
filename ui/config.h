@@ -31,3 +31,7 @@
 
 // LED
 #define LED_PIN         25
+
+// SD card detect pin — nie używamy, definiujemy jako pin który zawsze zwraca "karta włożona"
+// Display Pack 2.8" nie ma pinu SD detect
+#define SD_DET_PIN      22
