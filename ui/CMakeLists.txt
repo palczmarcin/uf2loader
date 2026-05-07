@@ -57,4 +57,4 @@ pico_add_extra_outputs(ui)
 
 target_link_options(ui PRIVATE -Wl,--print-memory-usage)
 
-target_compile_options(ui PRIVATE -DENABLE_RAM_APPS=1 -DENABLE_USB=1)
+target_compile_options(ui PRIVATE -DENABLE_RAM_APPS=1)
