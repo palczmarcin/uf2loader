@@ -81,6 +81,11 @@ void load_firmware_by_path(const char *path)
 {
   text_directory_ui_set_status("Loading app...");
 
+#if ENABLE_USB
+  // Zatrzymaj USB MSC żeby zwolnić dostęp do SPI/SD
+  usb_msc_stop();
+#endif
+
   // Attempt to load the application from the SD card
   enum uf2_result_e result = load_application_from_uf2(path);
 
