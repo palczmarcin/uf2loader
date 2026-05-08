@@ -127,7 +127,10 @@ int main()
 #if PICO_RP2350
   if (!bl_app_partition_get_info(workarea, sizeof(workarea), &app_start_offset, &app_size))
   {
-    mode = BOOT_UPDATE;
+    // Brak tablicy partycji RP2350 — spróbuj uruchomić jako plain binary
+    // (micropython nie ma tablicy partycji)
+    app_start_offset = 0x100;
+    app_size = PICO_FLASH_SIZE_BYTES - 0x100;
   }
 #endif
 
