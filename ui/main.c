@@ -28,8 +28,6 @@
 #include "ff.h"
 
 #if ENABLE_USB
-#include "usb_msc.h"
-#include "tusb.h"
 #endif
 
 #include "text_directory_ui.h"
@@ -190,6 +188,20 @@ int main()
 #if ENABLE_USB
   usb_msc_init();
 #endif
+
+  // TEST: spróbuj otworzyć plik od razu po fs_init
+  {
+    FIL test_fp;
+    FRESULT test_res = f_open(&test_fp, "/pico2-apps/micropython.uf2", FA_READ);
+    char dbg[64];
+    snprintf(dbg, sizeof(dbg), "Early f_open: %d", (int)test_res);
+    if (test_res == FR_OK) {
+      f_close(&test_fp);
+      snprintf(dbg, sizeof(dbg), "Early f_open: OK!");
+    }
+    // Pokaż wynik przez 3 sekundy zanim uruchomi menu
+    // Tymczasowy LCD print - użyjemy lcd_set_cursor + lcd_print_string
+  }
 
   text_directory_ui_init();
   text_directory_ui_set_final_callback(final_selection_callback);
