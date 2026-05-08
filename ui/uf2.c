@@ -200,7 +200,10 @@ enum uf2_result_e __attribute__((optimize("-O0"))) load_application_from_uf2(con
 
   if (res != FR_OK)
   {
-    DEBUG_PRINT("open %s fail: %s\n", filename, res);
+    char dbg[64];
+    snprintf(dbg, sizeof(dbg), "f_open err: %d", (int)res);
+    text_directory_ui_set_status(dbg);
+    sleep_ms(3000);
     return UF2_UNKNOWN;
   }
 
