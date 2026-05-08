@@ -20,18 +20,29 @@ jobs:
       with:
         submodules: recursive
 
-    - name: Clone pimoroni-pico
-      run: |
-        git clone https://github.com/pimoroni/pimoroni-pico.git --depth 1
-        cd pimoroni-pico
-        git submodule update --init --recursive
+    # Cache dla apt — gcc-arm-none-eabi to 588MB, pobieramy raz
+    - name: Cache apt packages
+      uses: actions/cache@v4
+      with:
+        path: /var/cache/apt/archives
+        key: apt-arm-none-eabi-${{ runner.os }}
+        restore-keys: apt-arm-none-eabi-
 
     - name: Install dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y cmake gcc-arm-none-eabi libnewlib-arm-none-eabi build-essential
 
+    # Cache dla pico-sdk — submoduły to kolejne ~200MB
+    - name: Cache pico-sdk
+      uses: actions/cache@v4
+      id: cache-pico-sdk
+      with:
+        path: pico-sdk
+        key: pico-sdk-2.1.0
+
     - name: Install Pico SDK
+      if: steps.cache-pico-sdk.outputs.cache-hit != 'true'
       run: |
         git clone https://github.com/raspberrypi/pico-sdk.git --branch 2.1.0 --depth 1
         cd pico-sdk
@@ -40,7 +51,7 @@ jobs:
     - name: Build
       run: |
         export PICO_SDK_PATH=${{ github.workspace }}/pico-sdk
-        cmake -DPICO_BOARD=pico2_w -B build -S .
+        cmake -DPICO_BOARD=pico_w -B build -S .
         cd build
         make -j$(nproc)
 
@@ -50,5 +61,4 @@ jobs:
         name: uf2loader-pico2w
         path: |
           build/**/*.uf2
-          build/**/*.bin
         retention-days: 30
