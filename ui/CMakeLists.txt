@@ -2,7 +2,6 @@ project(ui C CXX ASM)
 
 add_subdirectory(lib/sdmmc)
 add_subdirectory(lib/fatfs)
-add_subdirectory(lib/usb_msc)
 add_subdirectory(lib/binary_info_reader)
 
 add_executable(ui
@@ -43,9 +42,9 @@ target_link_libraries(ui
   boot_picobin_headers
   bootloader
   pr_binary_info_reader
-  usb_msc
+  # usb_msc USUNIĘTE — ENABLE_USB=0
   # i2ckbd USUNIĘTE
-  # hardware_i2c USUNIĘTE (używane tylko przez i2ckbd)
+  # hardware_i2c USUNIĘTE
 )
 
 pico_enable_stdio_usb(ui 0)
