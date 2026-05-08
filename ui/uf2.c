@@ -191,10 +191,30 @@ enum uf2_result_e __attribute__((optimize("-O0"))) load_application_from_uf2(con
     return UF2_UNKNOWN;
   }
 
+  {
+    char dbg[64];
+    snprintf(dbg, sizeof(dbg), "flash_end: 0x%08X", (unsigned)prog_area_end);
+    text_directory_ui_set_status(dbg);
+    sleep_ms(2000);
+  }
+
   // explicitly clear state in case a previous attempt failed
   memset(&s, 0, sizeof(s));
 
   s.filename = filename;
+
+  // Odmontuj i zamontuj ponownie SD przed otwarciem pliku
+  f_unmount("/");
+  sleep_ms(100);
+  FATFS fat2;
+  FRESULT remount = f_mount(&fat2, "/", 1);
+  if (remount != FR_OK) {
+    char dbg[64];
+    snprintf(dbg, sizeof(dbg), "remount err: %d", (int)remount);
+    text_directory_ui_set_status(dbg);
+    sleep_ms(3000);
+    return UF2_UNKNOWN;
+  }
 
   res = f_open(&fp, filename, FA_READ);
 
